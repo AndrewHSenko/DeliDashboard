@@ -1,4 +1,4 @@
-import difflib
+import squirrel as sq
 
 def parse_entry(raw_data):
     category_indexes = {
@@ -26,16 +26,30 @@ def parse_entry(raw_data):
             sos_data[category] = raw_data[index]
     return sos_data
 
-new_lines = []
-new_lines_data = []
-with open('c:/ProgramData/QSR Automations/ConnectSmart/BackOffice/SpeedofService/SpeedOfService.txt', 'r', encoding="utf-16") as has_more:
-    with open('c:/ProgramData/QSR Automations/ConnectSmart/BackOffice/SpeedofService/acSpeedOfService.txt', 'r', encoding="utf-16") as has_less:
-        diff_lines = difflib.unified_diff(has_more.readlines(), has_less.readlines())
-        for entry in diff_lines:
-            new_lines.append(entry)
-for line in new_lines:
-    if line[0] == '-' and line[1] != '-':
-        line_data = parse_entry(line.split(','))
-        new_lines_data.append(line_data)
-    elif line[0] == '+':
-        print('Random entry:', line)
+# PENDING CLEAN: Cleanup completed_tickets once their latest bump is 20 minutes after start_time #
+# start_time = '1000'
+
+completed_tickets = {}
+pending_tickets = {} # Key: trans_num
+
+# Every x seconds...
+with open('c:/ProgramData/QSR Automations/ConnectSmart/BackOffice/SpeedofService/SpeedOfService.txt', 'r', encoding="utf-16") as qsr_file:
+    for entry in qsr_file.readlines():
+        line_data = parse_entry(entry.split(','))
+        trans_num = line_data['trans_num']
+        station_name = line_data['station_name']
+        if trans_num in completed_tickets:
+            if completed_tickets[trans_num][station_name] == ''.join(line_data['bumped']): # Already seen this entry
+                continue
+            else:
+                completed_tickets[trans_num][station_name] = ''.join(line_data['bumped'])
+        if trans_num in pending_tickets:
+            pending_tickets[trans_num][station_name] = ''.join(line_data['bumped'])
+            if len(pending_tickets[trans_num]) == 4: # Has HOT START, HOT FINISH, PLATESVILLE, ANCHOR
+                completed_tickets[trans_num] = pending_tickets[trans_num] # Remove from pending checks
+                pending_tickets.pop(trans_num)
+        else:
+            pending_tickets[trans_num] = {station_name : ''.join(line_data['bumped'])}
+
+
+sq.get_check_data('1005', '1010')
