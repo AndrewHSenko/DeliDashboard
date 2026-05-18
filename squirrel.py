@@ -96,20 +96,20 @@ pv_ids = {
     # End defunct knish ids #
 }
 
-def get_check(cursor, start, end):
+def get_check(cursor: pyodbc.Cursor, start: datetime, end: datetime) -> list:
     # ci.DeptNo to divide between Deli (9) and ND (25) #
     query = '''
     SELECT ch.CheckNo, ct.Name, ci.SaleTime, ci.MenuID, ci.Quantity, ci.DeptNo
     FROM ((Squirrel.dbo.X_CheckHeader AS ch
     JOIN Squirrel.dbo.X_CheckTable AS ct ON ch.CheckID = ct.CheckID)
     JOIN Squirrel.dbo.X_CheckItem AS ci ON ch.CheckID = ci.CheckID)
-    WHERE ci.SaleTime BETWEEN ? AND ?
+    WHERE ci.SaleTime BETWEEN ? AND ? AND WHERE ci.DeptNo = 9
     ORDER BY ci.SaleTime ASC
     '''
     cursor.execute(query, start, end)
     return cursor.fetchall()
 
-def get_check_data(start, end):
+def get_check_data(start: str, end: str) -> dict:
     load_dotenv()
     SERVER = os.getenv('SERVER')
     DATABASE = os.getenv('DB')
@@ -121,7 +121,7 @@ def get_check_data(start, end):
         end_time = datetime.strptime(end, '%Y%m%d%H%M%S')
         rows = get_check(cursor, start_time, end_time) # List of all query results
         if rows == []: # No checks for this 5 minute period
-            return
+            return {}
         for check in rows:
             if check[-1] == '9': # Deli ticket, need to optimize to ignore Specialty Foods if possible
                 sale_time = check[2]
