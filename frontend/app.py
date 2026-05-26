@@ -290,7 +290,10 @@ def server(input, output, session):
         ts = datetime.now()
         if t0_ever[0] is None:
             t0_ever[0] = ts
+<<<<<<< HEAD
 
+=======
+>>>>>>> a63fe127dc4ea13a2868d409c1c812fc2990c824
         fc  = fill_counter[0]
         idx = fc % (ROWS * COLS)
         r, c = divmod(idx, COLS)
@@ -304,7 +307,10 @@ def server(input, output, session):
         else:
             pending = _grid_sum(grid_a) - _grid_sum(grid_b)
             val_b   = min(random.randint(10, 28), max(0, pending))
+<<<<<<< HEAD
 
+=======
+>>>>>>> a63fe127dc4ea13a2868d409c1c812fc2990c824
         grid_a[r][c] = val_a
         grid_b[r][c] = val_b
         fill_counter[0] += 1
