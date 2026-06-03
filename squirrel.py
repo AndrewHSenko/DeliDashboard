@@ -214,7 +214,7 @@ def get_check_data(start: str, end: str) -> dict:
         if check_qty == 0: # Skip checks that don't have SL items
             continue
         sale_time = check.strftime('%Y%m%d%H%M%S')
-        # Check No, Check Name, Check Qty, Has___, BLitems / PVitems #
+        # Check No, Check Name, Check Qty, Total Qty, BL Sq Qty / PV Sq Qty,  Has___, BL Qty / PV Qty , BL items / PV items #
         checks_data[sale_time] = [check_data['check_no'], check_data['check_name'], check_qty, total_qty, (bl_sq_qty, pv_sq_qty), (has_start, has_finish, has_PV), (bl_qty, pv_qty), (bl_items, pv_items)]
     # checks_data is now filled with the qty for each check (including empty checks)
     return checks_data
