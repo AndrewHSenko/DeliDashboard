@@ -11,7 +11,10 @@ backline_ids = {
     # 10257 : 'SOM DEC 25',
     # 9725 : 'SOM JAN 26',
     # 10347 : 'SOM FEB 26',
-    10377 : 'SOM MAR 26',
+    # 10377 : 'SOM MAR 26',
+    # 10409 : 'SOM APR 26',
+    # 10434 : 'SOM MAY 26',
+    10478 : 'SOM JUNE 26',
     1146 : 'CUSTOM',
     353 : '#1',
     379 : '#2',
@@ -103,9 +106,9 @@ def get_check(cursor: pyodbc.Cursor, start: datetime, end: datetime) -> list:
     FROM ((Squirrel.dbo.X_CheckHeader AS ch
     JOIN Squirrel.dbo.X_CheckTable AS ct ON ch.CheckID = ct.CheckID)
     JOIN Squirrel.dbo.X_CheckItem AS ci ON ch.CheckID = ci.CheckID)
-    WHERE ci.SaleTime BETWEEN ? AND ? AND WHERE ci.DeptNo = 9
+    WHERE ci.SaleTime BETWEEN ? AND ? AND ci.DeptNo = 9
     ORDER BY ci.SaleTime ASC
-    '''
+    ''' # DeptNo = 9 for Deli-only tickets
     cursor.execute(query, start, end)
     return cursor.fetchall()
 
@@ -123,15 +126,14 @@ def get_check_data(start: str, end: str) -> dict:
         if rows == []: # No checks for this 5 minute period
             return {}
         for check in rows:
-            if check[-1] == '9': # Deli ticket, need to optimize to ignore Specialty Foods if possible
-                sale_time = check[2]
-                if sale_time not in checks: 
-                    checks[sale_time] = {'check_no' : check[0], 'check_name' : check[1].strip(), 'menu_ids' : {check[3] : int(check[4])}}
+            sale_time = check[2]
+            if sale_time not in checks:
+                checks[sale_time] = {'check_no' : check[0], 'check_name' : check[1].strip(), 'menu_ids' : {check[3] : int(check[4])}}
+            else:
+                if check[3] in checks[sale_time]['menu_ids']:
+                    checks[sale_time]['menu_ids'][check[3]] += check[4]
                 else:
-                    if check[3] in checks[sale_time]['menu_ids']:
-                        checks[sale_time]['menu_ids'][check[3]] += check[4]
-                    else:
-                        checks[sale_time]['menu_ids'][check[3]] = check[4]
+                    checks[sale_time]['menu_ids'][check[3]] = check[4]
     # Now checks is filled with every check entered between start and end #
     # no_make_id = [595, 8291]
     checks_data = {}

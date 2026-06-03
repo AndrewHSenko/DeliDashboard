@@ -65,7 +65,7 @@ def find_entry(qsr_data, saletime, check_name):
 
 # Handles updating completed and pending dicts by reading through QSR file #
 def parse(completed_tickets: dict, pending_tickets: dict) -> bool:
-    try:
+    # try:
         with open('c:/ProgramData/QSR Automations/ConnectSmart/BackOffice/SpeedofService/SpeedOfService.txt', 'r', encoding="utf-16") as qsr_file:
             for entry in qsr_file.readlines():
                 line_data = parse_entry(entry.split(','))
@@ -91,9 +91,9 @@ def parse(completed_tickets: dict, pending_tickets: dict) -> bool:
                     else:
                         pending_tickets[sale_time] = {station_name : ''.join(line_data['bumped'])}
         return True
-    except Exception as e:
-        with open('qsr_errors.txt', 'a') as err_file:
-                err_file.write(f'{datetime.now()}:\n   + parse(): {e}')
-        return False
+    # except Exception as e:
+    #     with open('qsr_errors.txt', 'a') as err_file:
+    #             err_file.write(f'{datetime.now()}:\n   + parse(): {e}\n')
+    #     return False
     
     
