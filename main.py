@@ -21,7 +21,8 @@ def update_tickets(start: int, end: int) -> bool: # start is 900-1900ish (need t
         for sale_time, check_data in all_checks_data.items(): # sale time is the commonality between Squirrel and QSR
             if sale_time not in pending_tickets: # Initialize this ticket
                  pending_tickets[sale_time] = {
-                    'Name': check_data[0],
+                    'Check No.' : check_data[0],
+                    'Name': check_data[1],
                     'Qty': int(check_data[2]),
                     'Total Qty': int(check_data[3]),
                     'bl_sq_qty': int(check_data[4][0]),
@@ -38,7 +39,7 @@ def update_tickets(start: int, end: int) -> bool: # start is 900-1900ish (need t
                     'BL Items' : check_data[7][0],
                     'PV Items' : check_data[7][1],
                 }
-        qsr.parse(completed_tickets, pending_tickets) # Updates completed and pending tickets
+        qsr.parse(completed_tickets, pending_tickets, start) # Updates completed and pending tickets
         return True
     # except Exception as e:
     #     with open('main_errors.txt', 'a') as err_file:
@@ -46,4 +47,4 @@ def update_tickets(start: int, end: int) -> bool: # start is 900-1900ish (need t
     #     return False
     
 if __name__ == '__main__':
-    update_tickets(1000, 1055)
+    update_tickets(1000, 1059)

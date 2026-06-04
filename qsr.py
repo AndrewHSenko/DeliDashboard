@@ -27,23 +27,28 @@ def parse_entry(raw_data: list) -> dict:
     return sos_data
 
 # Removes part (ex 1/2 or 2/2) from check name
-def reformat_name(name): 
-    new_name = ''
-    if not name.split()[-1].isalpha():
-        new_name = ' '.join(name.split()[:-1])
-    else: # Handles if FoH enters Josh1/2 instead of Josh 1/2
-        new_name = ' '.join(name.split()[:-1]) + ' '
-        for c in name.split()[-1]:
-            if c.isalpha():
-                new_name += c
-    return new_name
+def reformat_name(name):
+    if not name.isnumeric():
+        new_name = ''
+        if not name.split()[-1].isalpha():
+            new_name = ' '.join(name.split()[:-1])
+        else: # Handles if FoH enters Josh1/2 instead of Josh 1/2
+            new_name = ' '.join(name.split()[:-1]) + ' '
+            for c in name.split()[-1]:
+                if c.isalpha():
+                    new_name += c
+        return new_name
+    return name
 
 def find_entry(qsr_data, saletime, check_name):
-    for d in qsr_data.values():
+    
+    print(qsr_data)
+    print()
+    for st, d in qsr_data.items():
         new_saletime = '' # For QSR entry
-        new_hour = int(d['entered'][-6:-4])
-        new_min = int(d['entered'][-4:-2])
-        new_sec = int(d['entered'][-2:]) - 1
+        new_hour = int(st[-6:-4])
+        new_min = int(st[-4:-2])
+        new_sec = int(st[-2:]) - 1
         if new_sec < 0:
             new_sec = 59
             new_min -= 1
@@ -59,18 +64,20 @@ def find_entry(qsr_data, saletime, check_name):
             new_sec = '0' + str(new_sec)
         new_saletime = saletime[:8] + str(new_hour) + str(new_min) + str(new_sec)
         new_sq_name = reformat_name(check_name)
-        new_qsr_name = reformat_name(d['check_name'])
+        new_qsr_name = reformat_name(d['Name'])
         if saletime == new_saletime and new_sq_name == new_qsr_name:
-            return saletime[:8] + d['entered'][-6:]
+            return saletime[:8] + st[-6:]
 
 # Handles updating completed and pending dicts by reading through QSR file #
-def parse(completed_tickets: dict, pending_tickets: dict) -> bool:
+def parse(completed_tickets: dict, pending_tickets: dict, start: int) -> bool:
     # try:
         with open('c:/ProgramData/QSR Automations/ConnectSmart/BackOffice/SpeedofService/SpeedOfService.txt', 'r', encoding="utf-16") as qsr_file:
             for entry in qsr_file.readlines():
                 line_data = parse_entry(entry.split(','))
                 sale_time = ''.join(line_data['entered'])
                 station_name = line_data['station_name']
+                if int(sale_time[-6:-2]) < start or station_name in ('COFFEE', 'COLD'): # Ignores irrelevant QSR entries stations
+                    continue
                 if sale_time in completed_tickets:
                     if completed_tickets[sale_time][station_name] == ''.join(line_data['bumped']): # Already seen this entry
                         continue

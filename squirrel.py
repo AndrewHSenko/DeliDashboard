@@ -100,13 +100,12 @@ pv_ids = {
 }
 
 def get_check(cursor: pyodbc.Cursor, start: datetime, end: datetime) -> list:
-    # ci.DeptNo to divide between Deli (9) and ND (25) #
     query = '''
     SELECT ch.CheckNo, ct.Name, ci.SaleTime, ci.MenuID, ci.Quantity, ci.DeptNo
     FROM ((Squirrel.dbo.X_CheckHeader AS ch
     JOIN Squirrel.dbo.X_CheckTable AS ct ON ch.CheckID = ct.CheckID)
     JOIN Squirrel.dbo.X_CheckItem AS ci ON ch.CheckID = ci.CheckID)
-    WHERE ci.SaleTime BETWEEN ? AND ? AND ci.DeptNo = 9
+    WHERE ci.SaleTime BETWEEN ? AND ?
     ORDER BY ci.SaleTime ASC
     ''' # DeptNo = 9 for Deli-only tickets
     cursor.execute(query, start, end)
@@ -128,7 +127,7 @@ def get_check_data(start: str, end: str) -> dict:
         for check in rows:
             sale_time = check[2]
             if sale_time not in checks:
-                checks[sale_time] = {'check_no' : check[0], 'check_name' : check[1].strip(), 'menu_ids' : {check[3] : int(check[4])}}
+                checks[sale_time] = {'check_no' : check[0], 'check_name' : str(check[1]).strip(), 'menu_ids' : {check[3] : int(check[4])}}
             else:
                 if check[3] in checks[sale_time]['menu_ids']:
                     checks[sale_time]['menu_ids'][check[3]] += check[4]
@@ -175,7 +174,7 @@ def get_check_data(start: str, end: str) -> dict:
                 check_qty += qty
                 total_qty += qty
                 pv_qty += qty
-                pv_sl_qty += qty
+                pv_sq_qty += qty
                 has_PV = True
             # elif menu_id in no_make_id: # Accounts for tickets rung in as no makes
             #     with open('nomakes.txt', 'a') as nm:
