@@ -47,4 +47,14 @@ def update_tickets(start: int, end: int) -> bool: # start is 900-1900ish (need t
     #     return False
     
 if __name__ == '__main__':
-    update_tickets(1000, 1059)
+    with open('main_log.txt', 'a') as log_file:
+        for i in range(1000, 1050, 5):
+            update_tickets(i, i + 5)
+            log_file.write('Pending:\n')
+            for sale_time, ticket_data in pending_tickets.items():
+                log_file.write(f'{ticket_data['Name']} ({sale_time}): {ticket_data['HOT START']} | {ticket_data['HOT FINISH']} | {ticket_data['PLATESVILLE']} | {ticket_data['ANCHOR']}\n')
+            log_file.write('Completed:\n')
+            for sale_time, ticket_data in completed_tickets.items():
+                log_file.write(f'{ticket_data['Name']} ({sale_time}): {ticket_data['HOT START']} | {ticket_data['HOT FINISH']} | {ticket_data['PLATESVILLE']} | {ticket_data['ANCHOR']}\n')
+        # update_tickets(1055, 1100)
+        # update_tickets(1100, 1155)
