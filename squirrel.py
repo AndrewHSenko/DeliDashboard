@@ -101,13 +101,13 @@ pv_ids = {
 
 def get_check(cursor: pyodbc.Cursor, start: datetime, end: datetime) -> list:
     query = '''
-    SELECT ch.CheckNo, ct.Name, ci.SaleTime, ci.MenuID, ci.Quantity, ci.DeptNo
+    SELECT ch.CheckNo, ct.Name, ci.SaleTime, ci.MenuID, ci.Quantity
     FROM ((Squirrel.dbo.X_CheckHeader AS ch
     JOIN Squirrel.dbo.X_CheckTable AS ct ON ch.CheckID = ct.CheckID)
     JOIN Squirrel.dbo.X_CheckItem AS ci ON ch.CheckID = ci.CheckID)
     WHERE ci.SaleTime BETWEEN ? AND ?
     ORDER BY ci.SaleTime ASC
-    ''' # DeptNo = 9 for Deli-only tickets
+    '''
     cursor.execute(query, start, end)
     return cursor.fetchall()
 
